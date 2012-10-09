@@ -16,5 +16,5 @@ chmod +x "lamp_setup.sh"
 
 Php 5.4 :
 <pre>wget "https://github.com/Paulmicha/debian-quickup/blob/master/lamp_setup_php54.sh" --quiet --no-check-certificate
-chmod +x "lamp_setup.sh"
+chmod +x "lamp_setup_php54.sh"
 ./lamp_setup_php54.sh this_first_param_is_the_mysql_root_password</pre>

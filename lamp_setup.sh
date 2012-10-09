@@ -297,8 +297,8 @@ curl -s http://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
 
 #       SQLite3
-apt-get install sqlite3
-apt-get install php5-sqlite
+apt-get install sqlite3 -y
+apt-get install php5-sqlite -y
 
 #       Restart
 /etc/init.d/apache2 restart
