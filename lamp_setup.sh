@@ -105,7 +105,6 @@ long_query_time = 5
 #       PHP
 apt-get install curl -y
 apt-get install php5 php5-dev php5-cli php5-common php5-mysql php5-curl php-pear php5-gd php5-mcrypt php5-xdebug -y
-apt-get install php5-imagick -y
 apt-get install php5-intl -y
 pecl install uploadprogress
 echo -e "extension=uploadprogress.so" > /etc/php5/apache2/conf.d/uploadprogress.ini
@@ -299,6 +298,10 @@ mv composer.phar /usr/local/bin/composer
 #       SQLite3
 apt-get install sqlite3 -y
 apt-get install php5-sqlite -y
+
+#       Image magik
+aptitude install imagemagick -y
+apt-get install php5-imagick -y
 
 #       Restart
 /etc/init.d/apache2 restart
