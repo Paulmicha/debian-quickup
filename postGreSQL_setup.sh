@@ -58,6 +58,8 @@ $conf['servers'][0]['host'] = 'localhost';
 #       Import a backup file
 pg_restore --username "mypguser" --dbname "mypgdatabase" --verbose --ignore-version /path/to/file/dump.backup
 
+#       May need to specify -h localhost :
+pg_restore --username "mypguser" --dbname "mypgdatabase" -h localhost --verbose --ignore-version /path/to/file/dump.dump
 
 
 
