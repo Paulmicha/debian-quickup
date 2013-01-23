@@ -11,6 +11,7 @@
 #   @see http://www.postgresql.org/download/linux/debian/
 #   @see http://php.net/manual/en/pgsql.installation.php
 #   @see http://phppgadmin.sourceforge.net/
+#   @see http://stackoverflow.com/questions/13704160/howto-pg-restore
 #
 
 #       Debian includes PostgreSQL by default. To install PostgreSQL on Debian, use the apt-get (or other apt-driving) command:
@@ -55,12 +56,11 @@ $conf['servers'][0]['host'] = 'localhost';
 #----------------------------------------
 #       Snippets
 
-#       Import a backup file
-pg_restore --username "mypguser" --dbname "mypgdatabase" --verbose --ignore-version /path/to/file/dump.backup
+#       Import DB dump
+pg_restore --username "mypguser" --dbname "mypgdatabase" -h localhost --verbose --ignore-version /path/to/file/mypgdatabase_dump.sql.tar
 
-#       May need to specify -h localhost :
-pg_restore --username "mypguser" --dbname "mypgdatabase" -h localhost --verbose --ignore-version /path/to/file/dump.dump
-
+#       Create DB dump
+pg_dump -U mypguser -h localhost -F t mypgdatabase > mypgdatabase_dump.sql.tar
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------------
