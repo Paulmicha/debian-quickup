@@ -26,7 +26,7 @@ apt-get install libcupsys2 samba samba-common -y
 mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
 echo -n '#       Global Settings
 [global]
-workgroup = $WORKGROUP
+workgroup = WORKGROUP
 server string = %h server
 dns proxy = no
 
