@@ -37,3 +37,11 @@ echo -e "extension=mongo.so" > /etc/php5/conf.d/mongo.ini
 /etc/init.d/apache2 restart
 
 
+#------------------------------------------------------------------------------------------
+#       Rockmongo (phpmyadmin-like for MongoDB)
+
+cd /var/www
+wget http://rockmongo.com/downloads/go?id=12 -O rockmongo.zip
+unzip rockmongo.zip
+rm -r __MACOSX
+
