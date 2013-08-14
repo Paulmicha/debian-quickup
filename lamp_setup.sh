@@ -127,13 +127,29 @@ mbstring.internal_encoding=UTF-8
 mbstring.detect_order=auto' \
     > '/etc/php5/conf.d/mbstring.ini'
 
-#       XDebug : enable remote debug
+#       XDebug remote setup
+#       Notes :
+#           Replace "192.168.*.*" with the machine's IP from which the client IDE is running
+#           Check path "/usr/lib/php5/20090626/xdebug.so" which may change depending on installed php version
+#echo '; Enable Remote XDebug
+#zend_extension=/usr/lib/php5/20090626/xdebug.so
+#xdebug.remote_enable=on
+#xdebug.remote_handler=dbgp
+#xdebug.remote_host=192.168.*.*
+#xdebug.remote_port=9000' \
+#    > '/etc/php5/conf.d/xdebug.ini'
+
+#       XDebug test ok 2013/04/22 11:12:22
+#       Note : if using NetBeans, menu Tools > Options > PHP > tab "Debugging" > uncheck 'stop at first line'
 echo '; Enable Remote XDebug
-xdebug.remote_enable=on
+zend_extension="/usr/lib/php5/20090626/xdebug.so"
+xdebug.remote_enable=1
 xdebug.remote_handler=dbgp
-xdebug.remote_host=0.0.0.0
+xdebug.remote_mode=req
+xdebug.remote_host="192.168.*.*"
 xdebug.remote_port=9000' \
     > '/etc/php5/conf.d/xdebug.ini'
+
 
 #       Main php.ini configuration
 mv /etc/php5/apache2/php.ini /etc/php5/apache2/php.ini.bak
