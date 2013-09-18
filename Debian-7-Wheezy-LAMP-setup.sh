@@ -128,7 +128,7 @@ mbstring.detect_order=auto' \
 #       Note : if using NetBeans, menu Tools > Options > PHP > tab "Debugging" > uncheck 'stop at first line'
 #       And don't forget to change "192.168.*.*" with the IP of the machine requesting the debug
 echo '; Enable Remote XDebug
-zend_extension="/usr/lib/php5/20100525/xdebug.so"
+; zend_extension="/usr/lib/php5/20100525/xdebug.so"
 xdebug.remote_enable=1
 xdebug.remote_handler=dbgp
 xdebug.remote_mode=req
