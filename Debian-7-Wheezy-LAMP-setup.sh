@@ -1973,7 +1973,7 @@ aptitude install imagemagick -y
 aptitude install php5-imagick -y
 
 #       Restart
-/etc/init.d/apache2 restart
+service apache2 restart
 
 
 
