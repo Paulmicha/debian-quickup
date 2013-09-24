@@ -75,7 +75,6 @@ echo -n '<VirtualHost *:80>
 DEBIAN_FRONTEND='noninteractive' aptitude install mysql-server apg -y
 echo "SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('${MYSQL_ADMIN_PASSWORD}')" | mysql --user=root
 echo "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${MYSQL_ADMIN_PASSWORD}')" | mysql --user=root
-#mysqladmin -u root password "${MYSQL_ADMIN_PASSWORD}"
 
 #       MySQL tuning
 echo '# Base MySQL optimisations.
@@ -129,7 +128,7 @@ mbstring.detect_order=auto' \
 #       Note : if using NetBeans, menu Tools > Options > PHP > tab "Debugging" > uncheck 'stop at first line'
 #       And don't forget to change "192.168.*.*" with the IP of the machine requesting the debug
 echo '; Enable Remote XDebug
-zend_extension="/usr/lib/php5/20090626/xdebug.so"
+; zend_extension="/usr/lib/php5/20100525/xdebug.so"
 xdebug.remote_enable=1
 xdebug.remote_handler=dbgp
 xdebug.remote_mode=req
@@ -601,7 +600,7 @@ memory_limit = 256M
 ; Development Value: E_ALL
 ; Production Value: E_ALL & ~E_DEPRECATED & ~E_STRICT
 ; http://php.net/error-reporting
-error_reporting = E_ALL & ~E_DEPRECATED
+error_reporting = E_ALL ^ E_STRICT
 
 ; This directive controls whether or not and where PHP will output errors,
 ; notices and warnings too. Error output is very useful during development, but
@@ -1989,12 +1988,13 @@ aptitude install ntp ntpdate -y
 ntpdate fr.pool.ntp.org
 
 #       Versionning
-aptitude install subversion -y
+#       Note : SVN still version 1.6 on wheezy by default...
+#       @see https://github.com/Paulmicha/debian-quickup/blob/master/Debian-7-Wheezy-SVN-1.8.sh
+#aptitude install subversion -y
 aptitude install git-core -y
 
 #       Drush
 pear upgrade-all
 pear channel-discover pear.drush.org
 pear install drush/drush
-
 
