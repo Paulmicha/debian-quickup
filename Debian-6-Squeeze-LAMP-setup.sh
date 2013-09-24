@@ -305,11 +305,13 @@ ldap.max_links = -1" > /etc/php5/apache2/php.ini
 #/etc/init.d/apache2 restart
 
 #       Composer
+cd /usr/local/bin
 cp /etc/php5/conf.d/suhosin.ini /etc/php5/conf.d/suhosin.ini.bak
 echo "suhosin.executor.include.whitelist = phar" >> /etc/php5/conf.d/suhosin.ini
 #/etc/init.d/apache2 restart
 curl -s http://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
+cd ~
 
 #       SQLite3
 apt-get install sqlite3 -y
@@ -336,7 +338,7 @@ apt-get install ntp ntpdate -y
 ntpdate fr.pool.ntp.org
 
 #       Versionning
-apt-get install subversion -y
+#apt-get install subversion -y
 apt-get install git-core -y
 
 #       Drush
