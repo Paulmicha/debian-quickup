@@ -10,6 +10,7 @@
 #   Sources :
 #   @see http://bailey.st/blog/2013/05/14/how-to-install-postgresql-9-2-on-debian-7-wheezy/
 #   @see http://www.postgresql.org/download/linux/debian/
+#   @see http://stackoverflow.com/questions/10757431/postgres-upgrade-a-user-to-be-a-superuser
 #   
 
 #       If you use this (as of 2013/09/18 15:29:12) you will get 9.1
@@ -38,6 +39,17 @@ psql
     \q
 
 
+
+#----------------------------------------
+#       Make any user a superuser
+#       @see http://stackoverflow.com/questions/10757431/postgres-upgrade-a-user-to-be-a-superuser
+
+psql
+    ALTER USER mypguser WITH SUPERUSER;
+    \q
+
+
+
 #----------------------------------------
 #       Setup first database
 
@@ -45,6 +57,7 @@ psql
     CREATE DATABASE mypgdatabase;
     GRANT ALL PRIVILEGES ON DATABASE mypgdatabase to mypguser;
     \q
+
 
 
 #----------------------------------------
