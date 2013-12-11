@@ -7,6 +7,7 @@
 #   
 #   tested 2013/09/18 16:00:39
 #   hacked 2013/09/18 16:17:57
+#   re-tested 2013/12/11 16:16:06
 #   
 #   Sources :
 #   http://mariobrandt.de/archives/linux/subversion-svn-1-8-on-debian-7-wheezy-724/
@@ -14,17 +15,23 @@
 #   
 
 
-#       Method below failed.
-#       Hack : manual installation
+#       update 2013/12/11 16:11:38 : Method below still fails
+#       -> manual installation
+
 cd ~
-wget http://opensource.wandisco.com/debian/dists/wheezy/svn18/binary-amd64/libserf1_1.2.1-1%2bWANdisco_amd64.deb
-dpkg -i libserf1_1.2.1-1+WANdisco_amd64.deb
-wget http://opensource.wandisco.com/debian/dists/wheezy/svn18/binary-amd64/libsvn1_1.8.3-1%2bWANdisco_amd64.deb
-dpkg -i libsvn1_1.8.3-1+WANdisco_amd64.deb
-wget http://opensource.wandisco.com/debian/dists/wheezy/svn18/binary-amd64/subversion_1.8.3-1%2bWANdisco_amd64.deb
-dpkg -i subversion_1.8.3-1+WANdisco_amd64.deb
-wget http://opensource.wandisco.com/debian/dists/wheezy/svn18/binary-amd64/subversion-tools_1.8.3-1%2bWANdisco_all.deb
-dpkg -i subversion-tools_1.8.3-1+WANdisco_all.deb
+
+wget http://opensource.wandisco.com/debian/dists/wheezy/svn18/binary-amd64/libserf1_1.3.2-2%2bWANdisco_amd64.deb
+dpkg -i libserf1_1.3.2-2+WANdisco_amd64.deb
+
+wget http://opensource.wandisco.com/debian/dists/wheezy/svn18/binary-amd64/libsvn1_1.8.5-1%2bWANdisco_amd64.deb
+dpkg -i libsvn1_1.8.5-1+WANdisco_amd64.deb
+
+wget http://opensource.wandisco.com/debian/dists/wheezy/svn18/binary-amd64/subversion_1.8.5-1%2bWANdisco_amd64.deb
+dpkg -i subversion_1.8.5-1+WANdisco_amd64.deb
+
+wget http://opensource.wandisco.com/debian/dists/wheezy/svn18/binary-amd64/subversion-tools_1.8.5-1%2bWANdisco_all.deb
+dpkg -i subversion-tools_1.8.5-1+WANdisco_all.deb
+
 
 #       Key to get packets
 #       error : Failed to fetch http://opensource.wandisco.com/debian/dists/wheezy/Release  Unable to find expected entry 'svn18/source/Sources' in Release file (Wrong sources.list entry or malformed file)
