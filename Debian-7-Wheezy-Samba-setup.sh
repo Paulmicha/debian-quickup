@@ -29,7 +29,7 @@ chown $USERNAME:www-data /var/www -R
 chmod 775 /var/www -R
 
 #       Install
-aptitude install libcupsys2 samba samba-common -y
+apt-get install libcupsys2 samba samba-common -y
 
 #       Sample Config (for local dev only, this is unsafe)
 mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
