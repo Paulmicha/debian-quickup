@@ -4,10 +4,10 @@
 ##
 #   Debian 7 Wheezy - Ruby setup
 #   
+#   tested 2014/03/21 01:11:43
+#   
 #   Sources :
 #   http://snugug.com/musings/installing-sass-and-compass-across-all-platform
-#   
-#   @author Paulmicha
 #   
 
 aptitude install ruby-full build-essential -y

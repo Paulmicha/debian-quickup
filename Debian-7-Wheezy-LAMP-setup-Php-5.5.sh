@@ -9,8 +9,11 @@
 #   
 #   Sources :
 #   http://www.dotdeb.org/instructions/
+#   http://markvaneijk.com/use-hhvm-to-speed-up-composer
+#   https://github.com/facebook/hhvm/wiki/Prebuilt-Packages-on-Debian-7
 #   http://stackoverflow.com/questions/3984824/sed-command-in-bash
 #   http://serverfault.com/questions/551854/is-it-possible-to-auto-update-php-ini-via-a-bash-script
+#   http://www.linuxfromscratch.org/blfs/view/svn/postlfs/profile.html
 #   
 #   @author Paulmicha
 #   @timestamp 2014/03/19 23:18:34
@@ -144,17 +147,11 @@ sed -e 's,max_input_time = 60,max_input_time = 120,g' -i /etc/php5/apache2/php.i
 sed -e 's,memory_limit = 128M,memory_limit = 256M,g' -i /etc/php5/apache2/php.ini
 sed -e 's,display_errors = Off,display_errors = On,g' -i /etc/php5/apache2/php.ini
 sed -e 's,post_max_size = 8M,post_max_size = 130M,g' -i /etc/php5/apache2/php.ini
-sed -e 's,post_max_size = 8M,post_max_size = 130M,g' -i /etc/php5/apache2/php.ini
 sed -e 's,upload_max_filesize = 2M,upload_max_filesize = 128M,g' -i /etc/php5/apache2/php.ini
 sed -e 's,;date.timezone =,date.timezone = '$(command cat /etc/timezone)',g' -i /etc/php5/apache2/php.ini
 
 #       Reload config
 service apache2 reload
-
-#       Composer
-cd /usr/local/bin
-curl -s http://getcomposer.org/installer | php
-mv composer.phar /usr/local/bin/composer
 
 #       SQLite3
 cd ~
@@ -167,6 +164,41 @@ apt-get install php5-imagick -y
 
 #       Restart Apache
 service apache2 restart
+
+
+
+#----------------------------------------------------------------------------
+#       Composer
+
+
+cd /usr/local/bin
+curl -s http://getcomposer.org/installer | php
+mv composer.phar /usr/local/bin/composer
+
+#       Install pre-built HHVM packge to speed up Composer
+#       (update 2014/03/21 00:16:01)
+#       @see http://markvaneijk.com/use-hhvm-to-speed-up-composer
+#       @see https://github.com/facebook/hhvm/wiki/Prebuilt-Packages-on-Debian-7
+wget -O - http://dl.hhvm.com/conf/hhvm.gpg.key | apt-key add -
+echo deb http://dl.hhvm.com/debian wheezy main | tee /etc/apt/sources.list.d/hhvm.list
+apt-get update
+apt-get install hhvm
+
+#       Bash alias
+#       update 2014/03/21 01:04:21 - choose between .bash_profile OR .bashrc (see below - Drush part)
+cd ~
+#echo "alias composer='hhvm /usr/local/bin/composer'" > '.bashrc'
+echo "alias composer='hhvm /usr/local/bin/composer'" > '.bash_profile'
+
+#       While we're at it...
+#echo "alias ls='ls --color=auto'
+#alias grep='grep --color=auto'" >> '.bashrc'
+echo "alias ls='ls --color=auto'
+alias grep='grep --color=auto'" >> '.bash_profile'
+
+#       Activate
+#source .bashrc
+source .bash_profile
 
 
 
@@ -198,17 +230,20 @@ ln -s /usr/local/share/drush/drush /usr/bin/drush
 composer install
 
 
-#       Tweak bash (basic test fails - alias not working)
-#cd ~
-#wget https://raw.github.com/drush-ops/drush/master/examples/example.bashrc
-#mv example.bashrc .drush_bashrc
+#       Tweak bash
+cd ~
+wget https://raw.github.com/drush-ops/drush/master/examples/example.bashrc
+mv example.bashrc .drush_bashrc
 
 #echo -n 'if [ -f ~/.drush_bashrc ] ; then
 #  . ~/.drush_bashrc
 #fi' > ~/.bash_profile
 
-#nano ~/.bash_profile
+echo 'if [ -f ~/.drush_bashrc ] ; then
+  . ~/.drush_bashrc
+fi' >> ~/.bash_profile
 
+    
 
 
 
