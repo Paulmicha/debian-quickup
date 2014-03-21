@@ -185,15 +185,20 @@ apt-get update
 apt-get install hhvm
 
 #       Bash alias
+#       update 2014/03/21 01:04:21 - choose between .bash_profile OR .bashrc (see below - Drush part)
 cd ~
-echo "alias composer='hhvm /usr/local/bin/composer'" > '.bashrc'
+#echo "alias composer='hhvm /usr/local/bin/composer'" > '.bashrc'
+echo "alias composer='hhvm /usr/local/bin/composer'" > '.bash_profile'
 
 #       While we're at it...
+#echo "alias ls='ls --color=auto'
+#alias grep='grep --color=auto'" >> '.bashrc'
 echo "alias ls='ls --color=auto'
-alias grep='grep --color=auto'" >> '.bashrc'
+alias grep='grep --color=auto'" >> '.bash_profile'
 
 #       Activate
-source .bashrc
+#source .bashrc
+source .bash_profile
 
 
 
@@ -230,9 +235,13 @@ cd ~
 wget https://raw.github.com/drush-ops/drush/master/examples/example.bashrc
 mv example.bashrc .drush_bashrc
 
-echo -n 'if [ -f ~/.drush_bashrc ] ; then
+#echo -n 'if [ -f ~/.drush_bashrc ] ; then
+#  . ~/.drush_bashrc
+#fi' > ~/.bash_profile
+
+echo 'if [ -f ~/.drush_bashrc ] ; then
   . ~/.drush_bashrc
-fi' > ~/.bash_profile
+fi' >> ~/.bash_profile
 
     
 
