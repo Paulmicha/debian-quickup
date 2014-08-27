@@ -29,6 +29,7 @@ apt-get update
 
 # Dependencies
 # NB: this will prompt for mysql root passwd
+# @todo non-interactive version
 apt-get install curl gawk g++ gcc make libc6-dev libreadline6-dev zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake libtool bison pkg-config libffi-dev git subversion imagemagick libmagickwand-dev mysql-server libmysqlclient-dev apache2 apache2-threaded-dev libcurl4-gnutls-dev apache2 libapache2-svn libapache-dbi-perl libapache2-mod-perl2 libdbd-mysql-perl libauthen-simple-ldap-perl openssl -y
 
 
