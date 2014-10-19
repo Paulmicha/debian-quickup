@@ -21,11 +21,49 @@
 #   http://ubuntuforums.org/archive/index.php/t-947821.html
 #   
 
-#       Setup (local dev)
-USERNAME="my_username"
+
+##
+#   Usage info
+#
+function usage {
+  echo "Install Samba + setup /var/www share for LOCAL dev
+Usage :
+  ./${SCRIPT_NAME} [ owner (default: current user) ] [ group (default: www-data) ] [ create mask (default: 775) ] [ directory mask (default: 775) ]
+"
+  exit 1
+}
+
+#       Param 1 : owner
+#       default : current user
+P_OWNER=${1}
+if [ -z "${1}" ]; then
+    P_OWNER="$USER"
+fi
+
+#       Param 2 : group
+#       default : www-data
+P_GROUP=${2}
+if [ -z "${2}" ]; then
+    P_GROUP="www-data"
+fi
+
+#       Param 3 : create mask
+#       default : .
+P_CREATE_MASK=${3}
+if [ -z "${3}" ]; then
+    P_CREATE_MASK="775"
+fi
+
+#       Param 4 : directory mask
+#       default : .
+P_DIR_MASK=${4}
+if [ -z "${4}" ]; then
+    P_DIR_MASK="755"
+fi
+
 
 #       Initialize Permissions
-chown $USERNAME:www-data /var/www -R
+chown $P_OWNER:$P_GROUP /var/www -R
 chmod 775 /var/www -R
 
 #       Install
@@ -33,7 +71,7 @@ apt-get install libcupsys2 samba samba-common -y
 
 #       Sample Config (for local dev only, this is unsafe)
 mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
-echo -n '#       Global Settings
+echo -n "#       Global Settings
 [global]
 workgroup = WORKGROUP
 server string = %h server
@@ -61,15 +99,15 @@ comment = Apache root fully accessible
 path = /var/www
 read only = No
 writable = Yes
-create mask = 0775
-directory mask = 0775
-force group = www-data
+create mask = 0$P_CREATE_MASK
+directory mask = 0$P_DIR_MASK
+force group = $P_GROUP
 force create mode
 force directory mode
 
-' > /etc/samba/smb.conf
+" > /etc/samba/smb.conf
 
 /etc/init.d/samba restart
-smbpasswd -a $USERNAME
+smbpasswd -a $P_OWNER
 
 

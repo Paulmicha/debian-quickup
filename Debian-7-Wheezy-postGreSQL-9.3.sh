@@ -21,7 +21,8 @@
 aptitude install python-software-properties -y
 wget --quiet -O - http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc | apt-key add -
 add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main"
-apt-get update && apt-get install postgresql -y
+apt-get update
+apt-get install postgresql -y
 
 #       Then install php support
 apt-get install php5-pgsql -y
