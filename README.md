@@ -1,20 +1,12 @@
-LAMP server quick setup shell script
-====================================
+Collection of Shell / Bash Setup Scripts
+========================================
 
-For local dev.
-Drupal & Symfony friendly.
-Tested on Debian 6 "Squeeze".
+**Mostly just for apt-get / aptitude based distributions (Debian, Ubuntu)**
 
-Prerequisites : A freshly installed Debian Linux server (or Ubuntu - untested), su or root session.
-Usage : copy & customize & paste the following shell command lines, or customize altogether to your liking.
-First param is optional - when not set, the defaut MySQL root user password will be "changeThisPassword"
+These are meant for quickly setting up local dev environments (typically VirtualBox VMs), when there's no Vagrant / Docker / Ansible / Puppet / Chef / whatever automation (or PaaS / SaaS) available at hand.
 
-Php 5.3 :
-<pre>wget "https://raw.github.com/Paulmicha/debian-quickup/master/lamp_setup.sh" --quiet --no-check-certificate
-chmod +x "lamp_setup.sh"
-./lamp_setup.sh this_first_param_is_the_mysql_root_password</pre>
+Re-organization 2014/11/27 :
+- Arbitrary categorization in folders
+- Naming convention to differenciate notes for a manual step by step procedure (filename.notes.sh) from actual executable scripts (filename.script.sh) that have been tested at least once successfully in indicated environment.
 
-Php 5.4 :
-<pre>wget "https://raw.github.com/Paulmicha/debian-quickup/master/lamp_setup_php54.sh" --quiet --no-check-certificate
-chmod +x "lamp_setup_php54.sh"
-./lamp_setup_php54.sh this_first_param_is_the_mysql_root_password</pre>
+@license MIT
