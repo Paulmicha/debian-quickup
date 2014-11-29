@@ -10,6 +10,7 @@
 #
 #   Sources :
 #   http://howto.biapy.com/fr/debian-gnu-linux/serveurs/http/creer-un-certificat-ssl-sur-debian
+#   https://letsencrypt.org/
 #
 
 #  (Ubuntu : as root)
@@ -58,7 +59,13 @@ chmod 440 "/etc/ssl/private/${SSL_KEY_NAME}.key"
 
 
 #-------------------------------------------------------------------------------------------------------------
-#       Option 2 : StartSSL (internet)
+#       Option 2 : letsencrypt.org (coming 2015)
+#       @see https://letsencrypt.org/
+
+
+
+#-------------------------------------------------------------------------------------------------------------
+#       Option 3 : StartSSL (internet)
 
 
 #       StartSSL free plan does not support wildcards (*)

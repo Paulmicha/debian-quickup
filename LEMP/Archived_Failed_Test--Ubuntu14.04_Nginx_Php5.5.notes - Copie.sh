@@ -28,64 +28,8 @@
 #   http://nginx.org/en/docs/http/server_names.html
 #   http://trac.nginx.org/nginx/ticket/314
 #   
-#   @timestamp 2014/11/29 18:52:48
+#   @timestamp 2014/11/29 17:40:36
 #   
-
-
-#----------------------------------------------------------------------------
-#       Samba share
-#       Typical local VM setup in bridged network
-#       -> share the WHOLE filesystem for convenience
-
-P_OWNER="$USER"
-P_GROUP="$USER"
-P_CREATE_MASK="640"
-P_DIR_MASK="750"
-
-apt-get install samba samba-common -y
-
-mv /etc/samba/smb.conf /etc/samba/smb.conf.bak
-echo -n "#       Global Settings
-[global]
-workgroup = WORKGROUP
-server string = %h server
-dns proxy = no
-
-#       Debugging/Accounting
-log file = /var/log/samba/log.%m
-max log size = 1000
-syslog = 0
-panic action = /usr/share/samba/panic-action %d
-
-#       Authentication
-security = user
-encrypt passwords = true
-passdb backend = tdbsam
-obey pam restrictions = yes
-unix password sync = yes
-passwd program = /usr/bin/passwd %u
-passwd chat = *Enter\snew\s*\spassword:* %n\n *Retype\snew\s*\spassword:* %n\n *password\supdated\ssuccessfully* .
-pam password change = yes
-
-#       Share Definitions
-[whole_system]
-comment = Whole system fully shared
-path = /
-read only = No
-writable = Yes
-create mask = 0$P_CREATE_MASK
-directory mask = 0$P_DIR_MASK
-force group = $P_GROUP
-force create mode
-force directory mode
-
-" > /etc/samba/smb.conf
-
-/etc/init.d/samba restart
-
-#       This will prompt for password + confirmation
-smbpasswd -a $P_OWNER
-
 
 
 #----------------------------------------------------------------------------
@@ -137,6 +81,9 @@ apt-get install php5-imagick -y
 #apt-get install php5-xdebug -y
 
 #       Main php.ini configuration : modif. with sed
+#       (NB: creates a backup on the 1st call - notice the argument -i.bak vs -i on subsequent calls)
+#       @see http://stackoverflow.com/questions/3984824/sed-command-in-bash
+#       @see http://serverfault.com/questions/551854/is-it-possible-to-auto-update-php-ini-via-a-bash-script
 sed -e 's,;default_charset = "UTF-8",default_charset = "UTF-8",g' -i.bak /etc/php5/fpm/php.ini
 sed -e 's,max_input_time = 60,max_input_time = 120,g' -i /etc/php5/fpm/php.ini
 sed -e 's,memory_limit = 128M,memory_limit = 256M,g' -i /etc/php5/fpm/php.ini
@@ -149,7 +96,7 @@ sed -e 's,;date.timezone =,date.timezone = '$(command cat /etc/timezone)',g' -i 
 sed -e 's,;cgi.fix_pathinfo=1,cgi.fix_pathinfo=0,g' -i /etc/php5/fpm/php.ini
 
 #       Reload config
-service 'php5-fpm' restart
+service 'php5-fpm' 'restart'
 
 
 #----------------------------------------------------------------------------
@@ -172,8 +119,38 @@ wget http://downloads.sourceforge.net/adminer/adminer-4.1.0-en.php -O adminer.ph
 
 
 #----------------------------------------------------------------------------
+#       Perusio Nginx configuration includes SSL
+#       -> install auto-signed certificate for local dev
+#       @see Security/Debian7_SSL.notes.sh
+
+apt-get install openssl ssl-cert -y
+mkdir --parent '/etc/ssl/private'
+mkdir --parent '/etc/ssl/requests'
+mkdir --parent '/etc/ssl/roots'
+mkdir --parent '/etc/ssl/chains'
+mkdir --parent '/etc/ssl/certificates'
+mkdir --parent '/etc/ssl/authorities'
+mkdir --parent '/etc/ssl/configs'
+chown -R root:ssl-cert '/etc/ssl/private'
+chmod 710 '/etc/ssl/private'
+chmod 440 '/etc/ssl/private/'*
+
+#       Auto-signed (for LAN)
+SSL_KEY_NAME="$(hostname --fqdn)"
+CONF_FILE="$(mktemp)"
+sed -e "s/@HostName@/${SSL_KEY_NAME}/" \
+    -e "s|privkey.pem|/etc/ssl/private/${SSL_KEY_NAME}.key|" \
+    '/usr/share/ssl-cert/ssleay.cnf' > "${CONF_FILE}"
+openssl req -config "${CONF_FILE}" -new -x509 -days 3650 \
+    -nodes -out "/etc/ssl/certificates/${SSL_KEY_NAME}.crt" -keyout "/etc/ssl/private/${SSL_KEY_NAME}.key"
+rm "${CONF_FILE}"
+chown root:ssl-cert "/etc/ssl/private/${SSL_KEY_NAME}.key"
+chmod 440 "/etc/ssl/private/${SSL_KEY_NAME}.key"
+
+
+#----------------------------------------------------------------------------
 #       Nginx Hosts & PHP-FPM configuration
-#       (NOT using perusio/drupal-with-nginx)
+#       (using perusio/drupal-with-nginx)
 
 cd ~
 tar czf ~/etc_nginx_dir_backup.tgz /etc/nginx
@@ -222,7 +199,7 @@ find /etc/nginx -type d -exec chmod 755 {} +
 chmod 755 /var/cache/nginx/microcache
 
 
-#       This is designed for my local dev VM,
+#       This is designed for my local dev VM (with Samba share, cli tools, etc),
 #       and I will want to support 2 "behaviors" - examples :
 #
 #       • http://192.168.123.123/example.com/dev/       <--- [1]
