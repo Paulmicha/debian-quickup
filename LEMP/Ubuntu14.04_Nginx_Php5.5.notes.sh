@@ -161,69 +161,64 @@ apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb9
 add-apt-repository 'deb http://mirror.edatel.net.co/mariadb//repo/10.1/ubuntu trusty main'
 
 apt-get update
+
+#       Note : this will prompt for root password + confirmation
 apt-get install mariadb-server -y
 
 #       PHP Driver (mysql)
 apt-get install php5-mysql -y
-
-#       Minimalist multi-DB Tool
-#cd /path/to/wherever
-wget http://downloads.sourceforge.net/adminer/adminer-4.1.0-en.php -O adminer.php
 
 
 #----------------------------------------------------------------------------
 #       Nginx Hosts & PHP-FPM configuration
 #       (NOT using perusio/drupal-with-nginx)
 
-cd ~
-tar czf ~/etc_nginx_dir_backup.tgz /etc/nginx
-rm /etc/nginx -r
-git clone https://github.com/perusio/drupal-with-nginx.git /etc/nginx
-mkdir /etc/nginx/sites-enabled
+#       Backup original nginx config
+mkdir --parent ~/manual_backups/nginx
+tar czf ~/manual_backups/nginx/entire-dir-etc-nginx.tgz /etc/nginx
 
-#       Bug with aio in /etc/nginx/apps/drupal/drupal.conf
-#       @see https://github.com/perusio/drupal-with-nginx/issues/136
-#       -> deactivate
-sed -e 's,aio on;,#aio on;,g' -i /etc/nginx/apps/drupal/drupal.conf
+#       Cleanup defaults
+rm /var/www/html -R
+rm /var/www/html -R
 
-#       Replace hardcoded ipv6
-#       @see http://superuser.com/questions/389766/linux-bash-how-to-get-interfaces-ipv6-address
-#       update 2014/11/29 18:30:27 FAILS (again. #Tired)
-#sed -e 's,\[fe80::202:b3ff:fe1e:8328\],\['"$(command ip addr show dev eth0 | sed -e's/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d')"'\],g' -i /etc/nginx/sites-available/000-default
-#sed -e 's,\[fe80\:\:202\:b3ff\:fe1e\:8329\],\['"$(command ip addr show dev eth0 | sed -e's/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d')"'\],g' -i /etc/nginx/sites-available/example.com.conf
-#       -> @evol replace with wildcard ?
-#       @see http://www.cyberciti.biz/faq/nginx-ipv6-configuration/
-#sed -e 's,\[fe80\:\:202\:b3ff\:fe1e\:8328\],\[\:\:\],g' -i /etc/nginx/sites-available/example.com.conf
-#sed -e 's,\[fe80\:\:202\:b3ff\:fe1e\:8329\],\[\:\:\],g' -i /etc/nginx/sites-available/example.com.conf
-#sed -e 's,\[fe80\:\:202\:b3ff\:fe1e\:8330\],\[\:\:\],g' -i /etc/nginx/sites-available/example.com.conf
-#       re-Fails 2014/11/29 18:36:33 (duplicate listen options for [::]:80)
-#       -> remove entirely.
-sed -e 's,listen \[,#listen \[,g' -i /etc/nginx/sites-available/example.com.conf
+#       test 2014/11/29 20:12:59 OK
+#       contents of /etc/nginx/sites-available/default :
+server {
+	
+	listen 80 default_server;
+	listen [::]:80 default_server;
+	root /var/www;
+	index index.php index.html index.htm index.nginx-debian.html;
+	server_name _;
+	
+	location / {
+		try_files $uri $uri/ =404;
+	}
 
-#       Replace example certificate
-#       @evol https://www.digitalocean.com/community/tutorials/how-to-configure-ocsp-stapling-on-apache-and-nginx
-sed -e 's,/etc/ssl/certs/example-cert.pem,/etc/ssl/certificates/'$(hostname --fqdn)'.crt,g' -i /etc/nginx/sites-available/example.com.conf
-sed -e 's,/etc/ssl/private/example.key,/etc/ssl/private/'$(hostname --fqdn)'.key,g' -i /etc/nginx/sites-available/example.com.conf
+	location ~ \.php$ {
+		include snippets/fastcgi-php.conf;
+		fastcgi_pass unix:/var/run/php5-fpm.sock;
+	}
+	
+}
 
-#       Fix nginx: [warn] "ssl_stapling" ignored, issuer certificate not found
-#       @evol https://www.digitalocean.com/community/tutorials/how-to-configure-ocsp-stapling-on-apache-and-nginx
-sed -e 's,ssl_stapling on;,#ssl_stapling on;,g' -i /etc/nginx/nginx.conf
-sed -e 's,resolver 8.8.8.8;,#resolver 8.8.8.8;,g' -i /etc/nginx/nginx.conf
+#       Then reload :
+service nginx restart
 
-#       FPM specific
-sed -e 's,#include php_fpm_status_allowed_hosts.conf;,include php_fpm_status_allowed_hosts.conf;,g' -i /etc/nginx/nginx.conf
+#       Contents of /var/www/index.php for test
+<?php phpinfo();
 
-#       Microcache folder
-mkdir --parent /var/cache/nginx/microcache
+#       Permissions
+chown root:www-data /var/www -R
+find /var/www -type f -exec chmod 644 {} +
+find /var/www -type d -exec chmod 755 {} +
 
-#       Fix perms
-find /etc/nginx -type f -exec chmod 644 {} +
-find /etc/nginx -type d -exec chmod 755 {} +
-chmod 755 /var/cache/nginx/microcache
+#       visit http://192.168.0.25/ (or whatever tour server is)
+#       -> tested ok 2014/11/29 20:18:02
 
-
+#       @todo 2014/11/29 20:12:03
 #       This is designed for my local dev VM,
-#       and I will want to support 2 "behaviors" - examples :
+#       and I will want to support 2 default "behaviors" - examples :
 #
 #       • http://192.168.123.123/example.com/dev/       <--- [1]
 #       • http://192.168.123.123/any-folder/            <--- [1']
@@ -251,50 +246,22 @@ chmod 755 /var/cache/nginx/microcache
 #           http://lan-123-123.io/                      --->        /var/www/lan-123-123.io/www/
 
 
-#       Nginx Hosts [1] : Implement Default configuration
-#       @see http://nginx.org/en/docs/http/server_names.html
-cp /etc/nginx/sites-available/example.com.conf ~
-mv /etc/nginx/sites-available/example.com.conf /etc/nginx/sites-available/_.conf
-sed -e 's,server_name example.com,server_name _,g' -i /etc/nginx/sites-available/_.conf
-sed -e 's,server_name www.example.com,server_name www.$hostname,g' -i /etc/nginx/sites-available/_.conf
-sed -e 's,://example.com,://$hostname,g' -i /etc/nginx/sites-available/_.conf
-sed -e 's,/var/www/sites/example.com,/var/www,g' -i /etc/nginx/sites-available/_.conf
-sed -e 's,#include php_fpm_status_vhost.conf;,include php_fpm_status_vhost.conf;,g' -i /etc/nginx/sites-available/_.conf
-sed -e 's,/var/log/nginx/example.com,/var/log/nginx/${hostname},g' -i /etc/nginx/sites-available/_.conf
 
-#       Replace example certificate (per-conf)
-#       @evol https://www.digitalocean.com/community/tutorials/how-to-configure-ocsp-stapling-on-apache-and-nginx
-#sed -e 's,/etc/ssl/certs/example-cert.pem,/etc/ssl/certificates/'$(hostname --fqdn)'.crt,g' -i /etc/nginx/sites-available/_.conf
-#sed -e 's,/etc/ssl/private/example.key,/etc/ssl/private/'$(hostname --fqdn)'.key,g' -i /etc/nginx/sites-available/_.conf
-
-ln -s /etc/nginx/sites-available/_.conf /etc/nginx/sites-enabled/_.conf
-
-
-#       Nginx Hosts [2] : Implement Dynamic configuration
-#       @see http://trac.nginx.org/nginx/ticket/314
-#   server_name ~^(?<sub>.+?)\.(?<dom>.+)$;
-#   root /srv/www/html/$dom/$sub/public;
-#cp ~/example.com.conf /etc/nginx/sites-available/example.com.conf
-#mv /etc/nginx/sites-available/example.com.conf /etc/nginx/sites-available/dynhosts.conf
-#sed -e 's,server_name example.com,server_name \~\^\(\?<sub>.\+\?\)\\\.\(\?<dom>.\+\)\$,g' -i /etc/nginx/sites-available/dynhosts.conf
-#sed -e 's,/var/www/sites/example.com,/var/www,g' -i /etc/nginx/sites-available/dynhosts.conf
-#ln -s /etc/nginx/sites-available/_.conf /etc/nginx/sites-enabled/dynhosts.conf
-
-
-
-#       Restart Nginx
-service nginx restart
-
-
-
-
-
-#       Ex config dynamic path :
-#https://gist.github.com/cbmd/4247040
+#----------------------------------------------------------------------------
+#       PHP admin Tools
 
 #       Opcode status
 #cd /path/to/wherever
 wget https://raw.githubusercontent.com/rlerdorf/opcache-status/master/opcache.php
 
+#       Minimalist multi-DB Tool
+#cd /path/to/wherever
+wget http://downloads.sourceforge.net/adminer/adminer-4.1.0-en.php -O adminer.php
+
+
+#----------------------------------------------------------------------------
+#       Misc
+
+apt-get install htop -y
 
 
