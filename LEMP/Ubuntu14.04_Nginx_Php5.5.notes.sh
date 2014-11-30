@@ -27,8 +27,9 @@
 #   https://www.digitalocean.com/community/tutorials/how-to-configure-ocsp-stapling-on-apache-and-nginx
 #   http://nginx.org/en/docs/http/server_names.html
 #   http://trac.nginx.org/nginx/ticket/314
+#   http://serverfault.com/a/459572/128304
 #   
-#   @timestamp 2014/11/29 18:52:48
+#   @timestamp 2014/11/30 04:34:50
 #   
 
 
@@ -179,7 +180,6 @@ tar czf ~/manual_backups/nginx/entire-dir-etc-nginx.tgz /etc/nginx
 
 #       Cleanup defaults
 rm /var/www/html -R
-rm /var/www/html -R
 
 #       test 2014/11/29 20:12:59 OK
 #       contents of /etc/nginx/sites-available/default :
@@ -188,7 +188,7 @@ server {
 	listen 80 default_server;
 	listen [::]:80 default_server;
 	root /var/www;
-	index index.php index.html index.htm index.nginx-debian.html;
+	index index.php index.html index.htm;
 	server_name _;
 	
 	location / {
@@ -244,6 +244,66 @@ find /var/www -type d -exec chmod 755 {} +
 #           Ideally, this exception should be handled (to avoid messing up the "subdomain = subdir" pattern) :
 #
 #           http://lan-123-123.io/                      --->        /var/www/lan-123-123.io/www/
+
+
+#       test failed 2014/11/30 04:33:46
+#       contents of /etc/nginx/sites-available/default :
+server {
+	
+	listen 80 default_server;
+	listen [::]:80 default_server;
+	root /var/www;
+	index index.php index.html index.htm;
+	server_name _;
+	
+	
+	set $basepath "/var/www";
+	set $domain $host;
+	
+	if ($domain ~ "^(.[^.]*)$") {
+		set $domain $1;
+		set $rootpath "${basepath}/${domain}/www/";
+		set $servername "${domain}";
+	}
+	
+	if ($domain ~ "^(.*)\.(.[^.]*)$") {
+		set $subdomain $1;
+		set $domain $2;
+		set $rootpath "${basepath}/${domain}/${subdomain}";
+		set $servername "${subdomain}.${domain}";
+	}
+	
+	if ($domain ~ "^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(.*)$") {
+        set $domain $host;
+        set $servername "${domain}";
+        set $rootpath "/var/www";
+        
+        # debug
+        # add_header X-debugch "${rootpath}";
+        
+        # gotcha 2014/11/30 04:32:59 :
+        # Nginx config is not a program, it's a declaration
+        # There's no way to ensure that your set directive will execute before root.
+        # @see http://serverfault.com/a/459572/128304
+        # -> @todo : rewrite with "map"...
+	}
+	
+	#server_name $servername;
+	access_log "/var/log/nginx/${servername}.access.log";
+	error_log "/var/log/nginx/${servername}.error.log";
+	#root $rootpath;
+	
+	
+	location / {
+		try_files $uri $uri/ =404;
+	}
+
+	location ~ \.php$ {
+		include snippets/fastcgi-php.conf;
+		fastcgi_pass unix:/var/run/php5-fpm.sock;
+	}
+	
+}
 
 
 
