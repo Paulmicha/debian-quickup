@@ -216,7 +216,8 @@ find /var/www -type d -exec chmod 755 {} +
 #       visit http://192.168.0.25/ (or whatever tour server is)
 #       -> tested ok 2014/11/29 20:18:02
 
-#       @todo 2014/11/29 20:12:03
+
+
 #       This is designed for my local dev VM,
 #       and I will want to support 2 default "behaviors" - examples :
 #
@@ -246,64 +247,85 @@ find /var/www -type d -exec chmod 755 {} +
 #           http://lan-123-123.io/                      --->        /var/www/lan-123-123.io/www/
 
 
-#       test failed 2014/11/30 04:33:46
+#       test ok 2014/11/30 22:15:05
 #       contents of /etc/nginx/sites-available/default :
 server {
-	
-	listen 80 default_server;
-	listen [::]:80 default_server;
-	root /var/www;
-	index index.php index.html index.htm;
-	server_name _;
-	
-	
-	set $basepath "/var/www";
-	set $domain $host;
-	
-	if ($domain ~ "^(.[^.]*)$") {
-		set $domain $1;
-		set $rootpath "${basepath}/${domain}/www/";
-		set $servername "${domain}";
-	}
-	
-	if ($domain ~ "^(.*)\.(.[^.]*)$") {
-		set $subdomain $1;
-		set $domain $2;
-		set $rootpath "${basepath}/${domain}/${subdomain}";
-		set $servername "${subdomain}.${domain}";
-	}
-	
-	if ($domain ~ "^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(.*)$") {
-        set $domain $host;
+    
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    index index.php index.html index.htm;
+    
+    
+    set $rootpath "/var/www";
+    set $domain $host;
+    set $case 0;
+    
+    if ($domain ~ "^(.[^.]*)\.([^.]+)$") {
+        set $domain "$1.$2";
+        set $rootpath "/var/www/${domain}/www";
         set $servername "${domain}";
-        set $rootpath "/var/www";
-        
-        # debug
-        # add_header X-debugch "${rootpath}";
-        
-        # gotcha 2014/11/30 04:32:59 :
-        # Nginx config is not a program, it's a declaration
-        # There's no way to ensure that your set directive will execute before root.
-        # @see http://serverfault.com/a/459572/128304
-        # -> @todo : rewrite with "map"...
-	}
-	
-	#server_name $servername;
-	access_log "/var/log/nginx/${servername}.access.log";
-	error_log "/var/log/nginx/${servername}.error.log";
-	#root $rootpath;
-	
-	
-	location / {
-		try_files $uri $uri/ =404;
-	}
+        set $case 1;
+    }
+    
+    if ($domain ~ "^(.*)\.(.[^.]*)\.([^.]+)$") {
+        set $subdomain $1;
+        set $domain "$2.$3";
+        set $rootpath "/var/www/${domain}/${subdomain}";
+        set $servername "${subdomain}.${domain}";
+        set $case 2;
+    }
+    
+    # debug ok 2014/11/30 22:04:48
+#    add_header X-debugco "${case}";
+#    add_header X-debugrp "${rootpath}";
+#    add_header X-debugsn "${servername}";
+    
+    server_name $servername;
+    access_log "/var/log/nginx/${servername}.access.log";
+    error_log "/var/log/nginx/${servername}.error.log";
+    root $rootpath;
+    
+    
+    location / {
+        try_files $uri $uri/ =404;
+    }
 
-	location ~ \.php$ {
-		include snippets/fastcgi-php.conf;
-		fastcgi_pass unix:/var/run/php5-fpm.sock;
-	}
-	
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+    }
+    
 }
+
+
+server {
+    
+    listen 80;
+    listen [::]:80;
+    index index.php index.html index.htm;
+    root /var/www;
+    server_name ~^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+(.*)$;
+    
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+    }
+}
+
+
+#       tested OK !
+#       http://192.168.0.25/test/
+#       http://subtest.lan-0-25.io/
+#       http://dev.lan-0-25.io/
+#       http://dev.lan-0-25.io/
+#       http://lan-0-25.io/
+#       http://www.lan-0-25.io/
+
+
 
 
 
