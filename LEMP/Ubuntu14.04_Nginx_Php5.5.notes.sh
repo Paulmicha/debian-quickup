@@ -9,8 +9,8 @@
 #       • MariaDB - 10.1
 #       • Git - 1.9.1
 #       • Auto-signed certificate
-#       • Custom Nginx dynamic hosts setup (Drupal-friendly, adapting perusio/drupal-with-nginx configuration)
-#       • [todo] Composer
+#       • Custom Nginx dynamic hosts setup
+#       • Composer
 #       • [todo] HHVM - Facebook's "HipHop" JIT Php compiler + bash alias for Composer
 #       • [todo] Drush 7 (for Drupal 8) + bash alias
 #   
@@ -28,8 +28,10 @@
 #   http://nginx.org/en/docs/http/server_names.html
 #   http://trac.nginx.org/nginx/ticket/314
 #   http://serverfault.com/a/459572/128304
+#   https://getcomposer.org/doc/00-intro.md#globally
+#   http://www.drush.org/en/master/install/
 #   
-#   @timestamp 2014/11/30 04:34:50
+#   @timestamp 2014/12/05 02:11:07
 #   
 
 
@@ -92,6 +94,7 @@ smbpasswd -a $P_OWNER
 #----------------------------------------------------------------------------
 #       Nginx
 
+
 add-apt-repository ppa:nginx/development
 aptitude update
 apt-get install nginx -y
@@ -100,17 +103,13 @@ apt-get install nginx -y
 apt-get install nginx-extras -y
 
 
+
 #----------------------------------------------------------------------------
 #       Php 5.5
 #       (default in Ubuntu 14.04 LTS "trusty" as of 2014/11/27 04:59:32)
 
+
 apt-get install php5-fpm -y
-
-
-#----------------------------------------------------------------------------
-#       Php extensions & config
-
-#       Cli
 apt-get install php5-cli -y
 
 #       Test :
@@ -134,8 +133,8 @@ apt-get install php5-sqlite -y
 apt-get install imagemagick -y
 apt-get install php5-imagick -y
 
-#       Xdebug (optional, untested)
-#apt-get install php5-xdebug -y
+#       Xdebug
+apt-get install php5-xdebug -y
 
 #       Main php.ini configuration : modif. with sed
 sed -e 's,;default_charset = "UTF-8",default_charset = "UTF-8",g' -i.bak /etc/php5/fpm/php.ini
@@ -153,8 +152,10 @@ sed -e 's,;cgi.fix_pathinfo=1,cgi.fix_pathinfo=0,g' -i /etc/php5/fpm/php.ini
 service 'php5-fpm' restart
 
 
+
 #----------------------------------------------------------------------------
 #       MariaDB 10.x
+
 
 #       NB: there's a tool to get mirror & proper version 
 #       @see https://downloads.mariadb.org/mariadb/repositories/
@@ -170,13 +171,15 @@ apt-get install mariadb-server -y
 apt-get install php5-mysql -y
 
 
+
 #----------------------------------------------------------------------------
 #       Nginx Hosts & PHP-FPM configuration
 #       (NOT using perusio/drupal-with-nginx)
 
+
 #       Backup original nginx config
 mkdir --parent ~/manual_backups/nginx
-tar czf ~/manual_backups/nginx/entire-dir-etc-nginx.tgz /etc/nginx
+tar czf ~/manual_backups/nginx/etc_nginx.folder.bak.tgz /etc/nginx
 
 #       Cleanup defaults
 rm /var/www/html -R
@@ -330,7 +333,85 @@ server {
 
 
 #----------------------------------------------------------------------------
+#       Composer
+#       @see https://getcomposer.org/doc/00-intro.md#globally
+
+
+cd /usr/local/bin
+curl -sS https://getcomposer.org/installer | php
+mv composer.phar /usr/local/bin/composer
+
+#       Add Composer's global bin directory to the system PATH (recommended):
+sed -i '1i export PATH="$HOME/.composer/vendor/bin:$PATH"' $HOME/.bashrc
+source $HOME/.bashrc
+
+
+
+#----------------------------------------------------------------------------
+#       Php HHVM for Composer
+#       @see http://markvaneijk.com/use-hhvm-to-speed-up-composer
+#       @see https://github.com/facebook/hhvm/wiki/Prebuilt-packages-on-Ubuntu-14.04
+
+
+wget -O - http://dl.hhvm.com/conf/hhvm.gpg.key | sudo apt-key add -
+echo deb http://dl.hhvm.com/ubuntu trusty main | sudo tee /etc/apt/sources.list.d/hhvm.list
+apt-get update
+apt-get install hhvm -y
+
+#       Result :
+#       HHVM is installed.
+*
+#       Running PHP web scripts with HHVM is done by having your webserver talk to HHVM
+#       over FastCGI. Install nginx or Apache, and then:
+#       $ sudo /usr/share/hhvm/install_fastcgi.sh
+#       $ sudo /etc/init.d/hhvm restart
+#       (if using nginx)  $ sudo /etc/init.d/nginx restart
+#       (if using apache) $ sudo /etc/init.d/apache restart
+*
+#       Detailed FastCGI directions are online at:
+#       https://github.com/facebook/hhvm/wiki/FastCGI
+*
+#       If you're using HHVM to run web scripts, you probably want it to start at boot:
+#       $ sudo update-rc.d hhvm defaults
+*
+#       Running command-line scripts with HHVM requires no special setup:
+#       $ hhvm whatever.php
+*
+#       You can use HHVM for /usr/bin/php even if you have php-cli installed:
+#       $ sudo /usr/bin/update-alternatives --install /usr/bin/php php /usr/bin/hhvm 60
+
+#       Start at boot
+update-rc.d hhvm defaults
+
+#       Always use HHVM for Composer
+#       -> create alias
+echo "alias composer='hhvm /usr/local/bin/composer'" >> $HOME/.bash_profile
+source $HOME/.bash_profile
+
+
+
+#----------------------------------------------------------------------------
+#       Drush
+
+
+#       From the docs :
+#       To install Drush 7.x (dev) which is required for Drupal 8
+#       -> this fails 2014/12/05 03:18:57
+#composer global require drush/drush:dev-master
+
+#       The old way : manual installation
+mkdir /usr/local/share/drush
+cd /usr/local/share/drush
+git clone https://github.com/drush-ops/drush.git -b master .
+chmod u+x drush
+ln -s /usr/local/share/drush/drush /usr/bin/drush
+composer install
+
+
+
+#----------------------------------------------------------------------------
 #       PHP admin Tools
+
 
 #       Opcode status
 #cd /path/to/wherever
@@ -341,9 +422,13 @@ wget https://raw.githubusercontent.com/rlerdorf/opcache-status/master/opcache.ph
 wget http://downloads.sourceforge.net/adminer/adminer-4.1.0-en.php -O adminer.php
 
 
+
 #----------------------------------------------------------------------------
 #       Misc
 
+
 apt-get install htop -y
+apt-get install unzip -y
+apt-get install git-core -y
 
 
