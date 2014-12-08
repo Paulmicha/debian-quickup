@@ -5,6 +5,9 @@
 #   Based on LEMP
 #   test on Ubuntu 14.04 LTS
 #   
+#   Sources
+#   https://github.com/Eugeny/ajenti-v/issues/61
+#   
 #   @timestamp 2014/12/08 00:30:35
 #   
 
@@ -158,6 +161,70 @@ service ajenti restart
 #----------------------------------------------------------------------------
 #       Notes
 #       @todo 2014/12/08 03:10:21 - document Ajenti conf
+
+
+#       test Drupal 7 ok
+#       @see https://github.com/Eugeny/ajenti-v/issues/61
+mkdir /usr/share/drupal-nginx-conf
+echo '# Enable compression, this will help if you have for instance advagg‎ module
+# by serving Gzip versions of the files.
+gzip_static on;
+
+location = /favicon.ico {
+    log_not_found off;
+    access_log off;
+}
+
+location = /robots.txt {
+    allow all;
+    log_not_found off;
+    access_log off;
+}
+
+location ~ \..*/.*\.php$ {
+    return 403;
+}
+
+# No no for private
+location ~ ^/sites/.*/private/ {
+    return 403;
+}
+
+# Block access to "hidden" files and directories whose names begin with a
+# period. This includes directories used by version control systems such
+# as Subversion or Git to store control files.
+location ~ (^|/)\. {
+    return 403;
+}
+
+location / {
+# This is cool because no php is touched for static content
+    try_files $uri @rewrite;
+}
+
+location @rewrite {
+    # You have 2 options here
+    # For D7 and above:
+    # Clean URLs are handled in drupal_environment_initialize().
+    rewrite ^ /index.php;
+}
+
+# Fighting with Styles? This little gem is amazing.
+# This is for D7 and D8
+location ~ ^/sites/.*/files/styles/ {
+    try_files $uri @rewrite;
+}
+
+location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
+    expires max;
+    log_not_found off;
+}
+' > /usr/share/drupal-nginx-conf/7.conf
+
+
+
+#       Ajenti > Websites > (pick one) > "Advanced" tab > "Custom configuration" textarea :
+include /usr/share/drupal-nginx-conf/7.conf;
 
 
 
