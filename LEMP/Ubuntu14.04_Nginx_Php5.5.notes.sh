@@ -148,6 +148,9 @@ sed -e 's,;date.timezone =,date.timezone = '$(command cat /etc/timezone)',g' -i 
 #       The interpreter will only process the exact file path — a much safer alternative
 sed -e 's,;cgi.fix_pathinfo=1,cgi.fix_pathinfo=0,g' -i /etc/php5/fpm/php.ini
 
+#       More memory allocated for opcode cache
+echo "opcache.memory_consumption=384" >> /etc/php5/mods-available/opcache.ini
+
 #       Reload config
 service 'php5-fpm' restart
 
