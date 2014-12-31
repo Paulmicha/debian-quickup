@@ -422,7 +422,8 @@ wget https://raw.githubusercontent.com/rlerdorf/opcache-status/master/opcache.ph
 
 #       Minimalist multi-DB Tool
 #cd /path/to/wherever
-wget http://downloads.sourceforge.net/adminer/adminer-4.1.0-en.php -O adminer.php
+#wget http://downloads.sourceforge.net/adminer/adminer-4.1.0-en.php -O adminer.php
+wget http://downloads.sourceforge.net/project/adminer/Adminer/Adminer%204.1.0/adminer-4.1.0-en.php -O adminer.php
 
 
 

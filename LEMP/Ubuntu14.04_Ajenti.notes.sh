@@ -49,24 +49,52 @@ apt-get install php5-gd -y
 apt-get install php5-mcrypt -y
 
 #       SQLite3
-apt-get install sqlite3 -y
-apt-get install php5-sqlite -y
+#apt-get install sqlite3 -y
+#apt-get install php5-sqlite -y
 
 #       Image magick
-apt-get install imagemagick -y
-apt-get install php5-imagick -y
+#apt-get install imagemagick -y
+#apt-get install php5-imagick -y
 
 #       Main php.ini configuration : modif. with sed
 sed -e 's,;default_charset = "UTF-8",default_charset = "UTF-8",g' -i.bak /etc/php5/fpm/php.ini
-sed -e 's,max_input_time = 60,max_input_time = 120,g' -i /etc/php5/fpm/php.ini
+#sed -e 's,max_input_time = 60,max_input_time = 120,g' -i /etc/php5/fpm/php.ini
 sed -e 's,memory_limit = 128M,memory_limit = 256M,g' -i /etc/php5/fpm/php.ini
-sed -e 's,display_errors = Off,display_errors = On,g' -i /etc/php5/fpm/php.ini
-sed -e 's,post_max_size = 8M,post_max_size = 130M,g' -i /etc/php5/fpm/php.ini
-sed -e 's,upload_max_filesize = 2M,upload_max_filesize = 128M,g' -i /etc/php5/fpm/php.ini
+#sed -e 's,display_errors = Off,display_errors = On,g' -i /etc/php5/fpm/php.ini
+sed -e 's,post_max_size = 8M,post_max_size = 48M,g' -i /etc/php5/fpm/php.ini
+sed -e 's,upload_max_filesize = 2M,upload_max_filesize = 40M,g' -i /etc/php5/fpm/php.ini
 sed -e 's,;date.timezone =,date.timezone = '$(command cat /etc/timezone)',g' -i /etc/php5/fpm/php.ini
+
+#       Note 2014/12/31 18:19:37 : Nginx error when uploading 2M file :
+#           413 Request Entity Too Large
+#       in nginx.conf :
+#       client_max_body_size 300M;
+#       But auto generated with Ajenti, so :
+#       -> Ajenti > Websites > 'Advanced' tab > 'Custom top level configuration'
+
+
+
+#----------------------------------------------------------------------------
+#       Php Security
+
 
 #       The interpreter will only process the exact file path — a much safer alternative
 sed -e 's,;cgi.fix_pathinfo=1,cgi.fix_pathinfo=0,g' -i /etc/php5/fpm/php.ini
+
+#       Sensitive functions
+#sed -e 's,allow_url_fopen = On,allow_url_fopen = Off,g' -i /etc/php5/fpm/php.ini
+sed -e 's,expose_php = On,expose_php = Off,g' -i /etc/php5/fpm/php.ini
+
+#       NB: these make sense per-project
+#       Ajenti : websites > (picj one) > Content > PHP > "php.ini values" textarea
+open_basedir = /path/to/project/folder;
+upload_tmp_dir = /path/to/project/folder/writeable/tmp;
+
+
+
+
+#----------------------------------------------------------------------------
+#       Php Optimizations
 
 #       More memory allocated for opcode cache
 echo "opcache.memory_consumption=384" >> /etc/php5/mods-available/opcache.ini
@@ -165,7 +193,7 @@ service ajenti restart
 
 #       test Drupal 7 ok
 #       @see https://github.com/Eugeny/ajenti-v/issues/61
-mkdir /usr/share/drupal-nginx-conf
+mkdir /usr/share/nginx/custom
 echo '# Enable compression, this will help if you have for instance advagg‎ module
 # by serving Gzip versions of the files.
 gzip_static on;
@@ -219,12 +247,12 @@ location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
     expires max;
     log_not_found off;
 }
-' > /usr/share/drupal-nginx-conf/7.conf
+' > /usr/share/nginx/custom/drupal-7.conf
 
 
 
 #       Ajenti > Websites > (pick one) > "Advanced" tab > "Custom configuration" textarea :
-include /usr/share/drupal-nginx-conf/7.conf;
+include /usr/share/nginx/custom/drupal-7.conf;
 
 
 
