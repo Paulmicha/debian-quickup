@@ -58,8 +58,9 @@ apt-get install php5-mcrypt -y
 
 #       Main php.ini configuration : modif. with sed
 sed -e 's,;default_charset = "UTF-8",default_charset = "UTF-8",g' -i.bak /etc/php5/fpm/php.ini
-#sed -e 's,max_input_time = 60,max_input_time = 120,g' -i /etc/php5/fpm/php.ini
+sed -e 's,max_input_time = 60,max_input_time = 180,g' -i /etc/php5/fpm/php.ini
 sed -e 's,memory_limit = 128M,memory_limit = 256M,g' -i /etc/php5/fpm/php.ini
+sed -e 's,max_execution_time = 30,max_execution_time = 300,g' -i /etc/php5/fpm/php.ini
 #sed -e 's,display_errors = Off,display_errors = On,g' -i /etc/php5/fpm/php.ini
 sed -e 's,post_max_size = 8M,post_max_size = 48M,g' -i /etc/php5/fpm/php.ini
 sed -e 's,upload_max_filesize = 2M,upload_max_filesize = 40M,g' -i /etc/php5/fpm/php.ini
@@ -68,9 +69,20 @@ sed -e 's,;date.timezone =,date.timezone = '$(command cat /etc/timezone)',g' -i 
 #       Note 2014/12/31 18:19:37 : Nginx error when uploading 2M file :
 #           413 Request Entity Too Large
 #       in nginx.conf :
-#       client_max_body_size 300M;
+#           client_max_body_size 300M;
 #       But auto generated with Ajenti, so :
 #       -> Ajenti > Websites > 'Advanced' tab > 'Custom top level configuration'
+#       add :
+client_max_body_size 300M;
+
+#       Note 2015/01/04 01:16:52 : Timeout on longer task :
+#           504 Gateway Time-out
+#       in vhost config :
+#           fastcgi_read_timeout 300;
+#       But auto generated with Ajenti, so :
+#       -> Ajenti > Websites > 'Content' tab > 'Advanced' collapsible zone > 'Custom configuration'
+#       add :
+fastcgi_read_timeout 300;
 
 
 
@@ -86,7 +98,7 @@ sed -e 's,;cgi.fix_pathinfo=1,cgi.fix_pathinfo=0,g' -i /etc/php5/fpm/php.ini
 sed -e 's,expose_php = On,expose_php = Off,g' -i /etc/php5/fpm/php.ini
 
 #       NB: these make sense per-project
-#       Ajenti : websites > (picj one) > Content > PHP > "php.ini values" textarea
+#       Ajenti : websites > (pick one) > Content > PHP > "php.ini values" textarea
 open_basedir = /path/to/project/folder;
 upload_tmp_dir = /path/to/project/folder/writeable/tmp;
 
@@ -197,6 +209,7 @@ mkdir /usr/share/nginx/custom
 echo '# Enable compression, this will help if you have for instance advagg‎ module
 # by serving Gzip versions of the files.
 gzip_static on;
+gzip_http_version 1.0;
 
 location = /favicon.ico {
     log_not_found off;
@@ -226,8 +239,13 @@ location ~ (^|/)\. {
 }
 
 location / {
-# This is cool because no php is touched for static content
+    # This is cool because no php is touched for static content
     try_files $uri @rewrite;
+    
+    # If using search404 or advagg, 404 have to be handled by Drupal
+    # test 2015/01/04 02:33:51 - this fails
+    # -> will have to adapt & test again @perusio/drupal-with-nginx
+    #error_page 404 /index.php;
 }
 
 location @rewrite {
