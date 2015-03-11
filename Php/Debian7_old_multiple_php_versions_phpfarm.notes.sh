@@ -2,7 +2,7 @@
 # -*- coding: UTF8 -*-
 
 ##
-#   FAILS 2015/03/11 16:13:35 :
+#   FAILS 2015/03/11 18:07:33 :
 #   Php files are not interpreted by FCGI (plain text)
 #   
 #   Install old and/or multiple versions of Php
@@ -100,8 +100,6 @@ ScriptAlias /cgi-bin-php/ /var/www/cgi-bin/
 #       Php-CGI setup
 #       (To do for each Php version installed
 #       + adapt Php version numbers below according to your needs)
-#       WARNING :
-#       On Php 5.2 and lower, the --enable-fastcgi configure flag is required :
 mkdir /var/www/cgi-bin
 echo -n '#!/bin/sh
 PHPRC="/etc/php5/cgi/5.2.13/"
@@ -112,16 +110,16 @@ export PHP_FCGI_CHILDREN
  
 PHP_FCGI_MAX_REQUESTS=5000
 export PHP_FCGI_MAX_REQUESTS
-
-#   Warning : Php 5.2 and lower only
-configoptions="$configoptions\
- --enable-fastcgi
-"
-#   (end Php 5.2 and lower only)
  
 exec /opt/phpfarm/inst/bin/php-cgi-5.2.13
 ' > /var/www/cgi-bin/php-cgi-5.2.13
 chmod +x /var/www/cgi-bin/php-cgi-5.2.13
+
+#       WARNING :
+#       On Php 5.2 and lower, the --enable-fastcgi configure flag is required :
+nano /opt/phpfarm/inst/bin/php-config-5.2.13
+#       -> Edit line 18 to obtain :
+#configure_options=" '--prefix=/opt/phpfarm/inst/php-5.2.13' '--exec-prefix=/opt/phpfarm/inst/php-5.2.13' '--enable-debug' '--disable-short-tags' '--without-pear' '--enable-bcmath' '--enable-calendar' '--enable-exif' '--enable-ftp' '--enable-mbstring' '--enable-pcntl' '--enable-soap' '--enable-sockets' '--enable-sqlite-utf8' '--enable-wddx' '--enable-zip' '--with-openssl' '--with-zlib' '--with-gettext' '--enable-fastcgi'"
 
 #       Restart to apply config
 service apache2 restart
