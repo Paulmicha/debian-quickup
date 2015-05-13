@@ -24,6 +24,9 @@
 #   $ ~/custom_scripts/debian8_lamp_setup.sh ThisFirstParamIsMySQLAdminPassword
 #   
 #   Sources :
+#   https://abdussamad.com/archives/620-Debian-Linux:-Setting-the-timezone-and-synchronizing-time-with-NTP.html
+#   http://support.ntp.org/bin/view/Servers/NTPPoolServers
+#   http://www.mad-hacking.net/documentation/linux/applications/ntp/ntpclient.xml
 #   https://github.com/facebook/hhvm/wiki/Prebuilt-Packages-on-Debian-8
 #   http://markvaneijk.com/use-hhvm-to-speed-up-composer
 #   http://stackoverflow.com/questions/3984824/sed-command-in-bash
@@ -53,14 +56,14 @@ echo -n '<VirtualHost *:80>
 a2enconf custom-lan-dev
 
 #       MySQL
-DEBIAN_FRONTEND='noninteractive' aptitude install mysql-server -y
+DEBIAN_FRONTEND='noninteractive' apt-get install mysql-server -y
 echo "SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('${MYSQL_ADMIN_PASSWORD}')" | mysql --user=root
 echo "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${MYSQL_ADMIN_PASSWORD}')" | mysql --user=root
 
 #       PHP
-aptitude install curl -y
-aptitude install php5 php5-dev php5-cli php5-common php5-mysql php5-curl php-pear php5-gd php5-mcrypt -y
-aptitude install php5-intl -y
+apt-get install curl -y
+apt-get install php5 php5-dev php5-cli php5-common php5-mysql php5-curl php-pear php5-gd php5-mcrypt -y
+apt-get install php5-intl -y
 pecl install uploadprogress
 echo -e "extension=uploadprogress.so" > /etc/php5/apache2/conf.d/50-uploadprogress.ini
 
@@ -101,10 +104,8 @@ apt-get install php5-sqlite -y
 service apache2 restart
 
 
-
 #----------------------------------------------------------------------------
 #       Composer
-
 
 cd /usr/local/bin
 curl -s http://getcomposer.org/installer | php
@@ -129,7 +130,6 @@ alias grep='grep --color=auto'" >> '.bash_profile'
 
 #       Activate
 source .bash_profile
-
 
 
 #----------------------------------------------------------------------------
@@ -166,10 +166,8 @@ fi' >> ~/.bash_profile
 source .bash_profile
 
 
-
 #----------------------------------------------------------------------------
 #       PHP admin Tools
-
 
 #       Opcode cache status
 #       (visualize memory allocated to opcode)
@@ -183,4 +181,26 @@ wget https://raw.githubusercontent.com/rlerdorf/opcache-status/master/opcache.ph
 mkdir /var/www/html/adminer
 wget http://downloads.sourceforge.net/adminer/adminer-4.2.1-mysql-en.php -O /var/www/html/adminer/index.php
 wget https://raw.github.com/vrana/adminer/master/designs/nette/adminer.css -O /var/www/html/adminer/adminer.css
+
+
+#----------------------------------------------------------------------------
+#       Server time
+
+apt-get install ntpdate -y
+
+#       The NTP Pool DNS system automatically picks time servers
+#       which are geographically close for you, but if you want
+#       to choose explicitly, there are sub-zones of pool.ntp.org.
+#       @see http://support.ntp.org/bin/view/Servers/NTPPoolServers
+ntpdate pool.ntp.org
+
+#       Make the changes stick : set the hardware clock
+hwclock --systohc
+
+#       Ensure that your server’s clock is always accurate
+#       → install the ntp daemon
+#       Note : seems to already be installed
+#apt-get install ntp -y
+
+
 
