@@ -44,7 +44,7 @@ fi
 #       LAMP stack
 
 #       Apache
-${cmdProxy} apt-get install apache2 -y
+apt-get install apache2 -y
 a2enmod rewrite
 
 #       Apache tuning default config
@@ -64,6 +64,8 @@ echo "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${MYSQL_ADMIN_PASSWORD}')"
 apt-get install curl -y
 apt-get install php5 php5-dev php5-cli php5-common php5-mysql php5-curl php-pear php5-gd php5-mcrypt -y
 apt-get install php5-intl -y
+
+#       Upload Progress
 pecl install uploadprogress
 echo -e "extension=uploadprogress.so" > /etc/php5/apache2/conf.d/50-uploadprogress.ini
 
@@ -76,15 +78,17 @@ mbstring.detect_order=auto" > /etc/php5/apache2/conf.d/20-mbstring.ini
 #       Main php.ini configuration : modif. with sed (NB: creates a backup on the 1st call)
 #       @see http://stackoverflow.com/questions/3984824/sed-command-in-bash
 #       @see http://serverfault.com/questions/551854/is-it-possible-to-auto-update-php-ini-via-a-bash-script
-sed -e 's,max_input_time = 60,max_input_time = 120,g' -i.bak /etc/php5/apache2/php.ini
-sed -e 's,memory_limit = 128M,memory_limit = 512M,g' -i /etc/php5/apache2/php.ini
+sed -e 's,memory_limit = 128M,memory_limit = 512M,g' -i.bak /etc/php5/apache2/php.ini
+sed -e 's,max_execution_time = 30,max_execution_time = 0,g' -i /etc/php5/apache2/php.ini
 sed -e 's,display_errors = Off,display_errors = On,g' -i /etc/php5/apache2/php.ini
-sed -e 's,post_max_size = 8M,post_max_size = 130M,g' -i /etc/php5/apache2/php.ini
 sed -e 's,upload_max_filesize = 2M,upload_max_filesize = 128M,g' -i /etc/php5/apache2/php.ini
+sed -e 's,max_input_time = 60,max_input_time = 120,g' -i /etc/php5/apache2/php.ini
+sed -e 's,post_max_size = 8M,post_max_size = 130M,g' -i /etc/php5/apache2/php.ini
 sed -e 's,;date.timezone =,date.timezone = '$(command cat /etc/timezone)',g' -i /etc/php5/apache2/php.ini
 
-#       In Debian 8, installing packet "php5" results in Php 5.6.7-1 as of 2015/05/08 00:48:13,
-#       and if didn't already know, there's an opcode cache built-in (no more APC •ᴗ•)
+#       Opcode Cache
+#       In Debian 8, installing packet "php5" results in Php 5.6.7-1 as of 2015/05/08 00:48:13
+#       Opcache is bundled in PHP >= 5.5
 #       → Allocate more memory for opcode cache (ex: 384M)
 echo "opcache.memory_consumption=384" >> /etc/php5/mods-available/opcache.ini
 
