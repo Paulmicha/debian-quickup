@@ -43,7 +43,9 @@ redis-server
 
 #------------------------------------------------------------------------------
 #   Redis php recommended module : Phpredis
+#   Note : current example uses a php-fpm setup (LEMP stack).
 
+#   Install
 cd ~
 apt-get install php5-dev -y
 git clone https://github.com/phpredis/phpredis.git
@@ -52,7 +54,13 @@ phpize
 ./configure
 make && make install
 
-#   Load the extension.
-#   Note : current example uses a php-fpm setup.
-echo "extension=redis.so" > /etc/php5/fpm/conf.d/20-redis.ini
+#   Load
+cat > /etc/php5/mods-available/redis.ini <<EOF
+; phpredis extension
+; priority=20
+extension=redis.so
+EOF
+ln -s /etc/php5/mods-available/redis.ini /etc/php5/cli/conf.d/20-redis.ini /etc/php5/fpm/conf.d/20-redis.ini
+
+#   Apply
 service php5-fpm restart
