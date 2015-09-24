@@ -183,23 +183,23 @@ wget https://raw.githubusercontent.com/rlerdorf/opcache-status/master/opcache.ph
 #       English-only, MySQL-only version
 #       @see http://www.adminer.org/#download for other (and latest) versions
 mkdir /var/www/html/adminer
-wget http://downloads.sourceforge.net/adminer/adminer-4.2.1-mysql-en.php -O /var/www/html/adminer/index.php
+wget https://downloads.sourceforge.net/adminer/adminer-4.2.2-mysql-en.php -O /var/www/html/adminer/index.php
 wget https://raw.github.com/vrana/adminer/master/designs/nette/adminer.css -O /var/www/html/adminer/adminer.css
 
 
 #----------------------------------------------------------------------------
 #       Server time
 
-apt-get install ntpdate -y
+#apt-get install ntpdate -y
 
 #       The NTP Pool DNS system automatically picks time servers
 #       which are geographically close for you, but if you want
 #       to choose explicitly, there are sub-zones of pool.ntp.org.
 #       @see http://support.ntp.org/bin/view/Servers/NTPPoolServers
-ntpdate pool.ntp.org
+#ntpdate pool.ntp.org
 
 #       Make the changes stick : set the hardware clock
-hwclock --systohc
+#hwclock --systohc
 
 #       Ensure that your server’s clock is always accurate
 #       → install the ntp daemon
