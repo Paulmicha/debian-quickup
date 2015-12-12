@@ -9,8 +9,8 @@
 #   Tested on Ubuntu 14.04 "Jessie",
 #   @timestamp 2015/12/12 13:39:41
 #
-#   Install :
-#   $ curl -s Paulmicha/debian-quickup/master/LAMP/Ubuntu14.04_Nginx_Php7.script.sh | bash /dev/stdin
+#   Install (untested 2015/12/12 - WIP) :
+#   $ curl -s https://raw.githubusercontent.com/Paulmicha/debian-quickup/master/LEMP/Ubuntu14.04_Nginx_Php7.script.sh | bash /dev/stdin
 #
 #		Sources :
 #		https://bjornjohansen.no/upgrade-to-php7
