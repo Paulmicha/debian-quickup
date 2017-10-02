@@ -6,23 +6,23 @@
 #   for local dev
 #   Drupal & Symfony friendly
 #   (to be run as root)
-#   
-#   Tested on Debian 8 "Jessie", 
+#
+#   Tested on Debian 8 "Jessie",
 #   @timestamp 2016/04/17 20:06:37
-#   
+#
 #   @todo make a version of this script using the better performing setup :
 #   apache2-mpm-worker + php-fpm
 #   @see https://github.com/Paulmicha/debian-quickup/blob/master/LAMP/Apache%20Php-FPM%20Composer%20HHVM/Debian7_MariaDB_Php5.5_Composer_HHVM_Drush7.script.sh
-#   
+#
 #   Install :
 #   $ mkdir ~/custom_scripts
 #   $ wget https://github.com/Paulmicha/debian-quickup/raw/master/LAMP/Debian8_LAMP.script.sh --quiet --no-check-certificate -O ~/custom_scripts/debian8_lamp_setup.sh
 #   $ chmod +x ~/custom_scripts/debian8_lamp_setup.sh
-#   
+#
 #   Use :
 #   Edit values to your liking, then
 #   $ ~/custom_scripts/debian8_lamp_setup.sh ThisFirstParamIsMySQLAdminPassword
-#   
+#
 #   Sources :
 #   https://abdussamad.com/archives/620-Debian-Linux:-Setting-the-timezone-and-synchronizing-time-with-NTP.html
 #   http://support.ntp.org/bin/view/Servers/NTPPoolServers
@@ -31,7 +31,7 @@
 #   http://markvaneijk.com/use-hhvm-to-speed-up-composer
 #   http://stackoverflow.com/questions/3984824/sed-command-in-bash
 #   http://serverfault.com/questions/551854/is-it-possible-to-auto-update-php-ini-via-a-bash-script
-#   
+#
 
 #   Param 1 : MySQL admin user password
 MYSQL_ADMIN_PASSWORD=${1}
